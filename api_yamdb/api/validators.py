@@ -7,7 +7,8 @@ from django.core.exceptions import ValidationError
 
 class UsernameRegexValidator(UnicodeUsernameValidator):
     """User Name Validation."""
-
+    
+    regex = r'@/./+/-/_'
     flags = 0
     max_length = settings.LENG_DATA_USER
     message = (f'Enter the correct username. It may contain:'
