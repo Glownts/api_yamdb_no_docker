@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 
 class UsernameRegexValidator(UnicodeUsernameValidator):
     """User Name Validation."""
-    
+
     regex = r'@/./+/-/_'
     flags = 0
     max_length = settings.LENG_DATA_USER
@@ -15,8 +15,9 @@ class UsernameRegexValidator(UnicodeUsernameValidator):
                f' only letters, numbers and signs @/./+/-/_.'
                f' Length not more than {settings.LENG_DATA_USER} symbols')
     error_messages = {
-        'invalid': f'The set of symbols is no more than {settings.LENG_DATA_USER}. '
-                   'Only letters, numbers and @/./+/-/_',
+        'invalid': ('The set of symbols is no more '
+                    f'than {settings.LENG_DATA_USER}. '
+                    'Only letters, numbers and @/./+/-/_'),
         'required': 'The field cannot be empty',
     }
 
@@ -28,7 +29,7 @@ def username_user(value):
             'User name not found.'
         )
     return value
-        
+
 
 def validate_year(value):
     """Checking the year."""

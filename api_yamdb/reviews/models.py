@@ -1,57 +1,11 @@
+from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import (MaxValueValidator, MinValueValidator,
-                                    validate_slug)
-from django.db import models
+from django.core.validators import MaxValueValidator, MinValueValidator
+
+from core.models import GenreAndCategoryModel, ReviewAndCommentModel
 
 from .validators import UsernameRegexValidator, username_user, validate_year
-
-
-class GenreAndCategoryModel(models.Model):
-    """Genre."""
-
-    slug = models.SlugField(
-        'Slug',
-        max_length=settings.LENG_SLUG,
-        unique=True,
-        validators=[validate_slug],
-    )
-    name = models.CharField(
-        'Title',
-        max_length=settings.LENG_MAX,
-    )
-
-    class Meta:
-        abstract = True
-        ordering = ('name', )
-
-    def __str__(self):
-        return self.name[:settings.LENG_CUT]
-
-
-class ReviewAndCommentModel(models.Model):
-    """ReviewAndComment."""
-
-    text = models.CharField(
-        'Review text',
-        max_length=settings.LENG_MAX
-    )
-    author = models.ForeignKey(
-        'User',
-        on_delete=models.CASCADE,
-        verbose_name='User'
-    )
-    pub_date = models.DateTimeField(
-        'Date of publication of the review',
-        auto_now_add=True,
-    )
-
-    class Meta:
-        abstract = True
-        ordering = ('-pub_date',)
-
-    def __str__(self):
-        return self.text[:settings.LENG_CUT]
 
 
 class User(AbstractUser):
@@ -73,8 +27,9 @@ class User(AbstractUser):
         unique=True,
         blank=False,
         null=False,
-        help_text=f'The set of characters is no more than {settings.LENG_DATA_USER}.'
-                  'Only letters, numbers and @/./+/-/_',
+        help_text=('The set of characters is no more '
+                   f'than {settings.LENG_DATA_USER}.'
+                   'Only letters, numbers and @/./+/-/_'),
         error_messages={
             'unique': "A user with that name already exists!",
         },
@@ -173,8 +128,8 @@ class Title(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Composition'
-        verbose_name_plural = 'Compositions'
+        verbose_name = 'Title'
+        verbose_name_plural = 'Titles'
         ordering = ('name',)
 
     def __str__(self):
@@ -186,10 +141,11 @@ class Review(ReviewAndCommentModel):
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
-        verbose_name='Composition'
+        related_name='reviews',
+        verbose_name='Title'
     )
     score = models.PositiveSmallIntegerField(
-        'Assessment',
+        'Score',
         db_index=True,
         validators=(
             MinValueValidator(1),
@@ -219,6 +175,7 @@ class Comment(ReviewAndCommentModel):
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
+        related_name='comments',
         verbose_name='Review'
     )
 

@@ -1,10 +1,23 @@
+'''
+Сеттинги проекта.
+'''
+
+import os
+
 from pathlib import Path
+
+from datetime import timedelta
+
+from dotenv import load_dotenv
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'no'
+dotenv_path = os.path.join(BASE_DIR, '.env')
+if os.path.exists(dotenv_path):
+    load_dotenv(dotenv_path)
+
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -21,7 +34,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'djoser',
     'api',
+    'reviews',
+    'core',
 ]
 
 MIDDLEWARE = [
@@ -111,3 +128,20 @@ LENG_CUT = 30
 
 MESSAGE_EMAIL_EXISTS = 'This email is already taken'
 MESSAGE_USERNAME_EXISTS = 'This name is already taken'
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=30),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+AUTH_USER_MODEL = 'reviews.User'
