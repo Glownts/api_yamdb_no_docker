@@ -6,15 +6,15 @@ from django.core.validators import validate_slug
 class GenreAndCategoryModel(models.Model):
     """Base model for Genre and Category models."""
 
+    name = models.CharField(
+        'Title',
+        max_length=settings.LENG_MAX,
+    )
     slug = models.SlugField(
         'Slug',
         max_length=settings.LENG_SLUG,
         unique=True,
         validators=[validate_slug],
-    )
-    name = models.CharField(
-        'Title',
-        max_length=settings.LENG_MAX,
     )
 
     class Meta:

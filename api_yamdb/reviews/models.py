@@ -99,6 +99,16 @@ class Genre(GenreAndCategoryModel):
 class Title(models.Model):
     """Title."""
 
+    name = models.CharField(
+        'Title',
+        max_length=settings.LENG_MAX,
+        db_index=True,
+    )
+    year = models.PositiveSmallIntegerField(
+        'Year of release',
+        db_index=True,
+        validators=(validate_year,),
+    )
     category = models.ForeignKey(
         Category,
         verbose_name='Category',
@@ -113,18 +123,8 @@ class Title(models.Model):
     )
     genre = models.ManyToManyField(
         Genre,
+        through='GenreTitle',
         verbose_name='Genre',
-        related_name='titles',
-    )
-    name = models.CharField(
-        'Title',
-        max_length=settings.LENG_MAX,
-        db_index=True,
-    )
-    year = models.PositiveSmallIntegerField(
-        'Year of release',
-        db_index=True,
-        validators=(validate_year,),
     )
 
     class Meta:
@@ -134,6 +134,14 @@ class Title(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class GenreTitle(models.Model):
+    title = models.ForeignKey(Title, on_delete=models.CASCADE)
+    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.genre} {self.title}'
 
 
 class Review(ReviewAndCommentModel):
@@ -183,11 +191,3 @@ class Comment(ReviewAndCommentModel):
         verbose_name = 'Comment'
         verbose_name_plural = 'Comments'
         default_related_name = 'comments'
-
-
-class GenreTitle(models.Model):
-    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
-    title = models.ForeignKey(Title, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f'{self.genre} {self.title}'
