@@ -8,18 +8,19 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from django.shortcuts import get_object_or_404
 
-from reviews.models import Category, Genre, Title
+from reviews.models import Category, Genre, Title, User
 
 from rest_framework import viewsets
 from rest_framework.filters import SearchFilter
 
-from .permissions import AdminOrReadOnly, AuthorOrReadOnly
+from .permissions import AdminOrReadOnly, AuthorOrReadOnly, MeOrAdminOnly
 from .serializers import (
     CategorySerializer,
     GenreSerializer,
     TitleSerializer,
     ReviewSerializer,
     CommentSerializer,
+    UserSerializer
 )
 
 
@@ -150,4 +151,27 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    pass
+    '''
+    При GET-запросе возвращает список всех экземпляров класса User
+    или вернет конретный экземпляр класса User c указаным user_id.
+    GET-запрос доступен только администратору. Или GET-запрос вернет
+    данные учетной записи конкретного аутентифицированного пользователя.
+
+    При POST-запросе создаст экземпляр класса User. Правом создания
+    обладает только администратор. Поля username и email должны быть
+    уникальны. Валидация идет на уровне модели.
+
+    Метод PATCH доступен аутентифицированному пользователю для своей
+    учетно записи или админу для всех учетных записей.
+
+    Метод DELETE доступен только администратору.
+    '''
+
+    serializer_class = UserSerializer
+    permission_classes = (MeOrAdminOnly,)
+
+    def get_queryset(self):
+        user = get_object_or_404(User, id=self.kwargs.get('user_id'))
+        if self.request.user == user:
+            return user
+        return User.objects.all()

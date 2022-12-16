@@ -11,3 +11,7 @@ class AdminOrReadOnly(permissions.BasePermission):
 
 class AuthorOrReadOnly(permissions.BasePermission):
     pass
+
+
+class MeOrAdminOnly(permissions.BasePermission):
+    pass

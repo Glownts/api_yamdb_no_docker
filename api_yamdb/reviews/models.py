@@ -183,3 +183,11 @@ class Comment(ReviewAndCommentModel):
         verbose_name = 'Comment'
         verbose_name_plural = 'Comments'
         default_related_name = 'comments'
+
+
+class GenreTitle(models.Model):
+    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
+    title = models.ForeignKey(Title, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.genre} {self.title}'

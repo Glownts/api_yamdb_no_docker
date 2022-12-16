@@ -1,3 +1,7 @@
+'''
+Конфиг приложения core.
+'''
+
 from django.apps import AppConfig
 
 
