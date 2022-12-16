@@ -6,12 +6,24 @@ from rest_framework import permissions
 
 
 class AdminOrReadOnly(permissions.BasePermission):
-    pass
+    def has_permission(self, request, view):
+        return True
+
+    def has_object_permission(self, request, view, obj):
+        return True
 
 
 class AuthorOrReadOnly(permissions.BasePermission):
-    pass
+    def has_permission(self, request, view):
+        return True
+
+    def has_object_permission(self, request, view, obj):
+        return True
 
 
 class MeOrAdminOnly(permissions.BasePermission):
-    pass
+    def has_permission(self, request, view):
+        return True
+
+    def has_object_permission(self, request, view, obj):
+        return True
