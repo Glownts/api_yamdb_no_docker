@@ -40,7 +40,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (AdminOrReadOnly,)
-    filter_backends = (SearchFilter,)
+    filter_backends = (DjangoFilterBackend, SearchFilter,)
     search_fields = ('name',)
 
     def perform_create(self, serializer):
@@ -63,7 +63,7 @@ class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (AdminOrReadOnly,)
-    filter_backends = (SearchFilter,)
+    filter_backends = (DjangoFilterBackend, SearchFilter,)
     search_fields = ('name',)
 
     def perform_create(self, serializer):
@@ -89,7 +89,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = TitleSerializer
     permission_classes = (AdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('name', 'genre', 'category', 'year,')
+    filterset_fields = ('name', 'genre__slug', 'category__slug', 'year',)
 
     def perform_create(self, serializer):
         return serializer.save()
