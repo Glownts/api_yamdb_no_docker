@@ -5,24 +5,33 @@
 '''
 
 from django_filters.rest_framework import DjangoFilterBackend
-
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 
 from reviews.models import Category, Genre, Title, User
-
-from rest_framework import viewsets
+from rest_framework import viewsets, permissions, status
 from rest_framework.filters import SearchFilter
-
-from .permissions import AdminOrReadOnly, AuthorOrReadOnly, MeOrAdminOnly
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework.viewsets import GenericViewSet, ModelViewSet, mixins
+from .permissions import (
+    AdminOrReadOnly,
+    AuthorOrReadOnly,
+    MeOrAdminOnly
+)
 from .serializers import (
     CategorySerializer,
     GenreSerializer,
     TitleSerializer,
     ReviewSerializer,
     CommentSerializer,
-    UserSerializer
+    UserSerializer,
+    RegisterSerializer,
+    TokenSerializer
 )
-
 
 class CategoryViewSet(viewsets.ModelViewSet):
     '''
@@ -150,6 +159,44 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user, review=review)
 
 
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def register(request):
+    serializer = RegisterSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    user = get_object_or_404(
+        User,
+        username=serializer.validated_data["username"]
+    )
+    confirmation_code = default_token_generator.make_token(user)
+    send_mail(
+        subject="regisrted in Yambd",
+        message=f"confirmation code: {confirmation_code}",
+        from_email=None,
+        recipient_list=[user.email],
+    )
+
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def get_jwt_token(request):
+    serializer = TokenSerializer(data=request.data)
+    if serializer.is_valid():
+        user = get_object_or_404(
+            User,
+            username=request.data.get('username')
+        )
+        c_code = user.confirmation_code
+        if request.data['confirmation_code'] == c_code:
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class UserViewSet(viewsets.ModelViewSet):
     '''
     При GET-запросе возвращает список всех экземпляров класса User
@@ -168,10 +215,33 @@ class UserViewSet(viewsets.ModelViewSet):
     '''
 
     serializer_class = UserSerializer
-    permission_classes = (MeOrAdminOnly,)
+    permission_classes = (MeOrAdminOnly, )
+    lookup_field = "Username"
+    queryset = User.objects.all()
+    pagination_class = PageNumberPagination
+    @action(
+        methods=[
+            "GET",
+            "PATCH",
+        ],
+        detail=False,
+        url_path="me",
+        permission_classes=[permissions.IsAuthenticated],
+    )
+    def users_own_profile(self, request):
+        user = request.user
+        if request.method == "GET":
+            serializer = self.get_serializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        if request.method == "PATCH":
+            serializer = self.get_serializer(
+                user,
+                data=request.data,
+                partial=True
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    def get_queryset(self):
-        user = get_object_or_404(User, id=self.kwargs.get('user_id'))
-        if self.request.user == user:
-            return user
-        return User.objects.all()
+
