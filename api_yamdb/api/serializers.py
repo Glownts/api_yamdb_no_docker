@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
@@ -53,11 +51,13 @@ class TitleSerializer(serializers.ModelSerializer):
             'genre', 'category')
 
 
-
 class ReviewSerializer(serializers.ModelSerializer):
-     author = serializers.SlugRelatedField(
-        slug_field='username', read_only=True, many=False, )
-    score = serializers.IntegerField(max_value=10, min_value=1)
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        read_only=True,
+        many=False,
+    )
+    score = serializers.IntegerField(min_value=1, max_value=10)
 
     class Meta:
         model = Review
@@ -91,7 +91,7 @@ class CommentSerializer(serializers.ModelSerializer):
         read_only = ('review',)
 
 
-class UsersSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     """Sterilizer for new users."""
 
     username = serializers.CharField(
