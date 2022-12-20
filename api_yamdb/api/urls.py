@@ -17,7 +17,10 @@ from .views import (
     GenreViewSet,
     TitleViewSet,
     ReviewViewSet,
-    CommentViewSet
+    CommentViewSet,
+    UserViewSet,
+    get_jwt_token,
+    register,
 )
 
 router = DefaultRouter()
@@ -28,9 +31,12 @@ router.register(r'titles/(?P<title_id>.+)/reviews',
                 ReviewViewSet, basename='reviews')
 router.register(r'titles/(?P<title_id>.+)/reviews/(?P<review_id>.+)/comments',
                 CommentViewSet, basename='comments')
+router.register(r'users', UserViewSet, basename='users')
 
 urlpatterns = [
     path('', include(router.urls)),
     path('', include('djoser.urls')),
     path('', include('djoser.urls.jwt')),
+    path('auth/signup/', register, name='register'),
+    path('auth/token/', get_jwt_token, name='token'),
 ]
