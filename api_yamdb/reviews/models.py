@@ -21,7 +21,7 @@ class User(AbstractUser):
     )
 
     username = models.CharField(
-        'Username',
+        'username',
         validators=(UsernameRegexValidator(), username_user),
         max_length=settings.LENG_DATA_USER,
         unique=True,
@@ -35,21 +35,21 @@ class User(AbstractUser):
         },
     )
     email = models.EmailField(
-        'Email',
+        'email',
         max_length=settings.LENG_EMAIL,
         unique=True,
         blank=False,
         null=False
     )
     role = models.CharField(
-        'Role',
+        'role',
         max_length=max(len(role) for role, _ in ROLE_CHOICES),
         choices=ROLE_CHOICES,
         default=USER,
         blank=True
     )
     bio = models.TextField(
-        'Biography',
+        'biography',
         blank=True,
     )
 
@@ -57,8 +57,8 @@ class User(AbstractUser):
 
     class Meta:
         ordering = ('id',)
-        verbose_name = 'User'
-        verbose_name_plural = 'Users'
+        verbose_name = 'user'
+        verbose_name_plural = 'users'
         constraints = [
             models.UniqueConstraint(
                 fields=['username', 'email'],
@@ -82,8 +82,8 @@ class Category(GenreAndCategoryModel):
     """Category."""
 
     class Meta(GenreAndCategoryModel.Meta):
-        verbose_name = 'Category'
-        verbose_name_plural = 'Categories'
+        verbose_name = 'category'
+        verbose_name_plural = 'categories'
         default_related_name = 'categories'
 
 
@@ -91,8 +91,8 @@ class Genre(GenreAndCategoryModel):
     """Genre."""
 
     class Meta(GenreAndCategoryModel.Meta):
-        verbose_name = 'Genre'
-        verbose_name_plural = 'Genres'
+        verbose_name = 'genre'
+        verbose_name_plural = 'genres'
         default_related_name = 'genres'
 
 
@@ -100,36 +100,36 @@ class Title(models.Model):
     """Title."""
 
     name = models.CharField(
-        'Title',
+        'title',
         max_length=settings.LENG_MAX,
         db_index=True,
     )
     year = models.PositiveSmallIntegerField(
-        'Year of release',
+        'year of release',
         db_index=True,
         validators=(validate_year,),
     )
     category = models.ForeignKey(
         Category,
-        verbose_name='Category',
+        verbose_name='category',
         on_delete=models.PROTECT,
         related_name='titles',
     )
     description = models.TextField(
-        'Description',
+        'description',
         db_index=True,
         max_length=settings.LENG_MAX,
         blank=True,
     )
     genre = models.ManyToManyField(
         Genre,
-        through='GenreTitle',
+        through='genretitle',
         verbose_name='Genre',
     )
 
     class Meta:
-        verbose_name = 'Title'
-        verbose_name_plural = 'Titles'
+        verbose_name = 'title'
+        verbose_name_plural = 'titles'
         ordering = ('name',)
 
     def __str__(self):
@@ -150,10 +150,10 @@ class Review(ReviewAndCommentModel):
         Title,
         on_delete=models.CASCADE,
         related_name='reviews',
-        verbose_name='Title'
+        verbose_name='title'
     )
     score = models.PositiveSmallIntegerField(
-        'Score',
+        'score',
         db_index=True,
         validators=(
             MinValueValidator(1),
@@ -164,10 +164,16 @@ class Review(ReviewAndCommentModel):
         },
         default=1
     )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='user',
+        related_name='author'
+    )
 
     class Meta(ReviewAndCommentModel.Meta):
-        verbose_name = 'Review'
-        verbose_name_plural = 'Reviews'
+        verbose_name = 'review'
+        verbose_name_plural = 'reviews'
         default_related_name = 'reviews'
         constraints = [
             models.UniqueConstraint(
@@ -184,10 +190,15 @@ class Comment(ReviewAndCommentModel):
         Review,
         on_delete=models.CASCADE,
         related_name='comments',
-        verbose_name='Review'
+        verbose_name='review'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='user',
     )
 
     class Meta(ReviewAndCommentModel.Meta):
-        verbose_name = 'Comment'
-        verbose_name_plural = 'Comments'
+        verbose_name = 'comment'
+        verbose_name_plural = 'comments'
         default_related_name = 'comments'

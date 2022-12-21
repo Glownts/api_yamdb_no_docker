@@ -1,7 +1,5 @@
 '''
 Функции-представления приложения api.
-
-Не хватает представления модели User
 '''
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -15,8 +13,6 @@ from rest_framework.filters import SearchFilter
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework.viewsets import GenericViewSet, ModelViewSet, mixins
 from .permissions import (
     AdminOrReadOnly,
     AuthorOrReadOnly,
@@ -32,6 +28,7 @@ from .serializers import (
     RegisterSerializer,
     TokenSerializer
 )
+
 
 class CategoryViewSet(viewsets.ModelViewSet):
     '''
@@ -217,10 +214,11 @@ class UserViewSet(viewsets.ModelViewSet):
     '''
 
     serializer_class = UserSerializer
-    permission_classes = (MeOrAdminOnly, )
-    lookup_field = "Username"
+    permission_classes = (MeOrAdminOnly,)
+    lookup_field = "username"
     queryset = User.objects.all()
     pagination_class = PageNumberPagination
+
     @action(
         methods=[
             "GET",
@@ -245,5 +243,3 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-

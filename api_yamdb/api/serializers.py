@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from reviews.validators import UsernameRegexValidator
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 from reviews.models import (
@@ -44,16 +45,13 @@ class TitleSerializer(serializers.ModelSerializer):
     """Sterilizer for returning the list of works."""
 
     rating = serializers.IntegerField(read_only=True)
-    category = CategorySerializer(read_only=True)
+    category = CategorySerializer(required=True)
     genre = GenreSerializer(many=True, read_only=True)
+    year = serializers.IntegerField(required=True)
 
     class Meta:
         model = Title
         fields = (
-            'id', 'name', 'year',
-            'rating', 'description',
-            'genre', 'category')
-        read_only_fields = (
             'id', 'name', 'year',
             'rating', 'description',
             'genre', 'category')
@@ -101,7 +99,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
 
-    """Sterilizer for new users."""
+    """Serializer for new users."""
 
     username = serializers.CharField(
         required=True,
@@ -134,7 +132,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def validate_username(self, value):
         if value.lower() == "me":
-            raise serializers.ValidationError("Username 'me' is not valid")
+            raise serializers.ValidationError('Username "me" is not valid')
         return value
 
     class Meta:
@@ -152,7 +150,8 @@ class TokenSerializer(serializers.Serializer):
         fields = (
             'username',
             'confirmation_code',
-            'token')
+            'token'
+        )
 
     def get_token(self, obj):
         user = get_object_or_404(
@@ -161,4 +160,3 @@ class TokenSerializer(serializers.Serializer):
         )
         refresh = RefreshToken.for_user(user)
         return str(refresh.access_token)
-

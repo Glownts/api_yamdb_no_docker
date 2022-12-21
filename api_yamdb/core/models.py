@@ -7,11 +7,11 @@ class GenreAndCategoryModel(models.Model):
     """Base model for Genre and Category models."""
 
     name = models.CharField(
-        'Title',
+        'title',
         max_length=settings.LENG_MAX,
     )
     slug = models.SlugField(
-        'Slug',
+        'slug',
         max_length=settings.LENG_SLUG,
         unique=True,
         validators=[validate_slug],
@@ -29,16 +29,11 @@ class ReviewAndCommentModel(models.Model):
     """Base model for Review and Comment."""
 
     text = models.CharField(
-        'Review text',
+        'text',
         max_length=settings.LENG_MAX
     )
-    author = models.ForeignKey(
-        'User',
-        on_delete=models.CASCADE,
-        verbose_name='User'
-    )
     pub_date = models.DateTimeField(
-        'Date of publication of the review',
+        'date of publication of the review',
         auto_now_add=True,
     )
 
