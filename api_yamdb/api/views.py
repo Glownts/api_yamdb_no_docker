@@ -6,8 +6,13 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework_simplejwt.tokens import RefreshToken
+
 
 from reviews.models import Category, Genre, Title, User
+from api.filters import TitleFilter
+from api.mixins import PostListDelMixin
 from rest_framework import viewsets, permissions, status
 from rest_framework.filters import SearchFilter
 from rest_framework.decorators import action, api_view, permission_classes
@@ -30,7 +35,7 @@ from .serializers import (
 )
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CategoryViewSet(PostListDelMixin):
     '''
     При GET-запросе возвращает список всех экземпляров класса Category
     c функцией поиска по name. GET-запрос доступен всем пользователям.
@@ -54,7 +59,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
         return serializer.save()
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(PostListDelMixin):
     '''
     При GET-запросе возвращает список всех экземпляров класса Genre
     c функцией поиска по name. GET-запрос доступен всем пользователям.
@@ -97,10 +102,12 @@ class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = TitleSerializer
     permission_classes = (AdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('name', 'genre__slug', 'category__slug', 'year',)
+    filterset_class = TitleFilter
 
-    def perform_create(self, serializer):
-        return serializer.save()
+    def get_serializer_class(self):
+        if self.action in ('list', 'retrieve',):
+            return TitleSerializer
+        return TitleReadSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -121,11 +128,13 @@ class ReviewViewSet(viewsets.ModelViewSet):
     permission_classes = (AuthorOrReadOnly,)
 
     def get_queryset(self):
-        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
+        title_id = self.kwargs.get('title_id')
+        title = get_object_or_404(Title, id=title_id)
         return title.reviews.all()
 
     def perform_create(self, serializer):
-        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
+        title_id = self.kwargs.get('title_id')
+        title = get_object_or_404(Title, id=title_id)
         serializer.save(author=self.request.user, title=title)
 
 
@@ -193,8 +202,10 @@ def get_jwt_token(request):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+    token_refresh = RefreshToken.for_user(user)
+    token = str(token_refresh.access_token)
+    response = {'token': token}
+    return Response(response, status=status.HTTP_200_OK)
 
 class UserViewSet(viewsets.ModelViewSet):
     '''
@@ -218,7 +229,8 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = "username"
     queryset = User.objects.all()
     pagination_class = PageNumberPagination
-
+    search_fields = ['username', ]
+    
     @action(
         methods=[
             "GET",
