@@ -7,11 +7,10 @@ class GenreAndCategoryModel(models.Model):
     """Base model for Genre and Category models."""
 
     name = models.CharField(
-        'title',
+        unique=True,
         max_length=settings.LENG_MAX,
     )
     slug = models.SlugField(
-        'slug',
         max_length=settings.LENG_SLUG,
         unique=True,
         validators=[validate_slug],
@@ -29,11 +28,9 @@ class ReviewAndCommentModel(models.Model):
     """Base model for Review and Comment."""
 
     text = models.CharField(
-        'text',
         max_length=settings.LENG_MAX
     )
     pub_date = models.DateTimeField(
-        'date of publication of the review',
         auto_now_add=True,
     )
 

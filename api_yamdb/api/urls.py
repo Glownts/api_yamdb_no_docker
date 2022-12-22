@@ -14,13 +14,13 @@ from rest_framework.routers import DefaultRouter
 
 from .views import (
     CategoryViewSet,
-    GenreViewSet,
-    TitleViewSet,
-    ReviewViewSet,
     CommentViewSet,
+    GenreViewSet,
+    ReviewViewSet,
+    TitleViewSet,
     UserViewSet,
     get_jwt_token,
-    register,
+    signup,
 )
 
 router = DefaultRouter()
@@ -35,6 +35,6 @@ router.register(r'users', UserViewSet, basename='users')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('auth/signup/', register, name='register'),
     path('auth/token/', get_jwt_token, name='token'),
+    path('auth/signup/', signup, name='signup'),
 ]
