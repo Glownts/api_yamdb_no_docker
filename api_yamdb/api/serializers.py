@@ -18,6 +18,17 @@ class CategorySerializer(serializers.ModelSerializer):
         }
 
 
+class GenreSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Genre
+        exclude = ('id',)
+        lookup_field = 'slug'
+        extra_kwargs = {
+            'url': {'lookup_field': 'slug'}
+        }
+
+
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True,
@@ -28,17 +39,6 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ('id', 'text', 'author', 'pub_date',)
-
-
-class GenreSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Genre
-        exclude = ('id',)
-        lookup_field = 'slug'
-        extra_kwargs = {
-            'url': {'lookup_field': 'slug'}
-        }
 
 
 class TitleSerializer(serializers.ModelSerializer):
@@ -145,9 +145,7 @@ class UserSerializer(serializers.ModelSerializer):
         if self.context['request'].method == 'PATCH':
             path_username = self.context['view'].kwargs.get('username')
 
-        if email and User.objects.filter(
-            email=data['email']
-        ).exists():
+        if email and User.objects.filter(email=data['email']).exists():
             existing = User.objects.get(email=data['email'])
             if username and existing.username != username:
                 raise serializers.ValidationError(
@@ -158,9 +156,7 @@ class UserSerializer(serializers.ModelSerializer):
                     detail='This email already used'
                 )
 
-        if username and User.objects.filter(
-            username=username
-        ).exists():
+        if username and User.objects.filter(username=username).exists():
             existing = User.objects.get(username=data['username'])
             if email and existing.email != email:
                 raise serializers.ValidationError(
@@ -208,18 +204,14 @@ class SelfSerializer(serializers.ModelSerializer):
         email = data.get('email')
         username = data.get('username')
 
-        if email and User.objects.filter(
-            email=email
-        ).exists():
+        if email and User.objects.filter(email=email).exists():
             existing = User.objects.get(email=data['email'])
             if existing.username != сurrent_user_username:
                 raise serializers.ValidationError(
                     detail='This email already used'
                 )
 
-        if username and User.objects.filter(
-            username=username
-        ).exists():
+        if username and User.objects.filter(username=username).exists():
             existing = User.objects.get(username=username)
             if existing.email != сurrent_user_email:
                 raise serializers.ValidationError(
@@ -251,17 +243,13 @@ class SignupSerializer(serializers.ModelSerializer):
         return data
 
     def validate(self, data):
-        if User.objects.filter(
-            email=data['email']
-        ).exists():
+        if User.objects.filter(email=data['email']).exists():
             existing = User.objects.get(email=data['email'])
             if existing.username != data['username']:
                 raise serializers.ValidationError(
                     detail='This email already used'
                 )
-        if User.objects.filter(
-            username=data['username']
-        ).exists():
+        if User.objects.filter(username=data['username']).exists():
             existing = User.objects.get(username=data['username'])
             if existing.email != data['email']:
                 raise serializers.ValidationError(
