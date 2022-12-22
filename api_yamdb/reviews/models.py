@@ -21,7 +21,7 @@ class User(AbstractUser):
     )
 
     username = models.CharField(
-        'Username',
+        'username',
         validators=(UsernameRegexValidator(), username_user),
         max_length=settings.LENG_DATA_USER,
         unique=True,
@@ -35,21 +35,21 @@ class User(AbstractUser):
         },
     )
     email = models.EmailField(
-        'Email',
+        'email',
         max_length=settings.LENG_EMAIL,
         unique=True,
         blank=False,
         null=False
     )
     role = models.CharField(
-        'Role',
+        'role',
         max_length=max(len(role) for role, _ in ROLE_CHOICES),
         choices=ROLE_CHOICES,
         default=USER,
         blank=True
     )
     bio = models.TextField(
-        'Biography',
+        'biography',
         blank=True,
     )
 
@@ -57,8 +57,6 @@ class User(AbstractUser):
 
     class Meta:
         ordering = ('id',)
-        verbose_name = 'User'
-        verbose_name_plural = 'Users'
         constraints = [
             models.UniqueConstraint(
                 fields=['username', 'email'],
@@ -81,55 +79,43 @@ class User(AbstractUser):
 class Category(GenreAndCategoryModel):
     """Category."""
 
-    class Meta(GenreAndCategoryModel.Meta):
-        verbose_name = 'Category'
-        verbose_name_plural = 'Categories'
-        default_related_name = 'categories'
-
 
 class Genre(GenreAndCategoryModel):
     """Genre."""
-
-    class Meta(GenreAndCategoryModel.Meta):
-        verbose_name = 'Genre'
-        verbose_name_plural = 'Genres'
-        default_related_name = 'genres'
 
 
 class Title(models.Model):
     """Title."""
 
     name = models.CharField(
-        'Title',
+        'title',
         max_length=settings.LENG_MAX,
-        db_index=True,
+        help_text='Введите название произведения'
     )
     year = models.PositiveSmallIntegerField(
-        'Year of release',
-        db_index=True,
+        'year of release',
         validators=(validate_year,),
     )
     category = models.ForeignKey(
         Category,
-        verbose_name='Category',
-        on_delete=models.PROTECT,
+        help_text='Категория, к которой будет относиться произведение',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
         related_name='titles',
     )
     description = models.TextField(
-        'Description',
-        db_index=True,
+        'description',
         max_length=settings.LENG_MAX,
         blank=True,
+        null=True
     )
     genre = models.ManyToManyField(
         Genre,
-        through='GenreTitle',
-        verbose_name='Genre',
+        through='genretitle',
     )
 
     class Meta:
-        verbose_name = 'Title'
-        verbose_name_plural = 'Titles'
         ordering = ('name',)
 
     def __str__(self):
@@ -145,16 +131,14 @@ class GenreTitle(models.Model):
 
 
 class Review(ReviewAndCommentModel):
-    """Review."""
+
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
         related_name='reviews',
-        verbose_name='Title'
     )
     score = models.PositiveSmallIntegerField(
-        'Score',
-        db_index=True,
+        'score',
         validators=(
             MinValueValidator(1),
             MaxValueValidator(10)
@@ -162,13 +146,15 @@ class Review(ReviewAndCommentModel):
         error_messages={
             'validators': 'Score from 1 to 10!'
         },
-        default=1
+        default=5
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='reviews'
     )
 
     class Meta(ReviewAndCommentModel.Meta):
-        verbose_name = 'Review'
-        verbose_name_plural = 'Reviews'
-        default_related_name = 'reviews'
         constraints = [
             models.UniqueConstraint(
                 fields=('title', 'author',),
@@ -183,11 +169,8 @@ class Comment(ReviewAndCommentModel):
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
-        related_name='comments',
-        verbose_name='Review'
-    )
-
-    class Meta(ReviewAndCommentModel.Meta):
-        verbose_name = 'Comment'
-        verbose_name_plural = 'Comments'
-        default_related_name = 'comments'
+        related_name='comments')
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='comments')

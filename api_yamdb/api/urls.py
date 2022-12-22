@@ -14,10 +14,13 @@ from rest_framework.routers import DefaultRouter
 
 from .views import (
     CategoryViewSet,
+    CommentViewSet,
     GenreViewSet,
-    TitleViewSet,
     ReviewViewSet,
-    CommentViewSet
+    TitleViewSet,
+    UserViewSet,
+    get_jwt_token,
+    signup,
 )
 
 router = DefaultRouter()
@@ -28,9 +31,10 @@ router.register(r'titles/(?P<title_id>.+)/reviews',
                 ReviewViewSet, basename='reviews')
 router.register(r'titles/(?P<title_id>.+)/reviews/(?P<review_id>.+)/comments',
                 CommentViewSet, basename='comments')
+router.register(r'users', UserViewSet, basename='users')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('', include('djoser.urls')),
-    path('', include('djoser.urls.jwt')),
+    path('auth/token/', get_jwt_token, name='token'),
+    path('auth/signup/', signup, name='signup'),
 ]
