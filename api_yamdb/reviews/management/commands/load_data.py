@@ -25,7 +25,7 @@ database with tables"""
 DIR = './static/data/'
 
 
-class Load_Data(BaseCommand):
+class Command(BaseCommand):
     '''
     Загружает данные из csv в БД.
     Если данные уже есть в БД, выдаст ошибку ALREDY_LOADED_ERROR_MESSAGE.
