@@ -9,7 +9,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 
 from core.models import GenreAndCategoryModel, ReviewAndCommentModel
 
-from .validators import UsernameRegexValidator, username_user, validate_year
+from .validators import UsernameValidator, validate_year
 
 
 class User(AbstractUser):
@@ -42,7 +42,7 @@ class User(AbstractUser):
 
     username = models.CharField(
         'username',
-        validators=(UsernameRegexValidator(), username_user),
+        validators=(UsernameValidator(),),
         max_length=settings.LENG_DATA_USER,
         unique=True,
         help_text=('The set of characters is no more '

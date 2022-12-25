@@ -45,8 +45,7 @@ class TitleSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True)
     category = CategorySerializer()
     rating = serializers.FloatField(read_only=True)
-    
-    
+
     class Meta:
         model = Title
         fields = (
@@ -146,10 +145,6 @@ class UserSerializer(serializers.ModelSerializer):
         if email and User.objects.filter(email=data['email']).exists():
             existing = User.objects.get(email=data['email'])
             if username and existing.username != username:
-                raise serializers.ValidationError(
-                    detail='This email already used'
-                )
-            if path_username and existing.username != path_username:
                 raise serializers.ValidationError(
                     detail='This email already used'
                 )

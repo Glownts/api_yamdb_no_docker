@@ -9,7 +9,7 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ValidationError
 
 
-class UsernameRegexValidator(UnicodeUsernameValidator):
+class UsernameValidator(UnicodeUsernameValidator):
     """Валидация поля username."""
 
     regex = r'@/./+/-/_'
@@ -25,14 +25,13 @@ class UsernameRegexValidator(UnicodeUsernameValidator):
         'required': 'The field cannot be empty',
     }
 
-
-def username_user(value):
-    """Подтвержедение поля username."""
-    if value == 'me':
-        raise ValidationError(
-            'User name not found.'
-        )
-    return value
+    def username_user(value):
+        """Подтвержедение поля username."""
+        banned = ['me']
+        if str(value).lower() in banned:
+            raise ValidationError(
+                'Username is prohibited.'
+            )
 
 
 def validate_year(value):

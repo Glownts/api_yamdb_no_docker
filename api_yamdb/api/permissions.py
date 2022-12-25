@@ -2,12 +2,10 @@ from rest_framework import permissions
 
 
 class AdminOnly(permissions.BasePermission):
+
     def has_permission(self, request, view):
         if request.user.is_authenticated:
-            return ( request.user.is_admin
-            or request.user.is_staff
-            or request.user.is_superuser)
-        return False
+            return request.user.is_admin
 
 
 class AdminOrReadOnly(permissions.BasePermission):
@@ -22,8 +20,10 @@ class AuthorModeratorAdminOrReadOnly(permissions.BasePermission):
     @staticmethod
     def _is_moderator_or_admin(user):
         return (
-            user.is_authenticated and
-            (user.is_admin or user.is_moderator or user.is_superuser)
+            user.is_authenticated
+            and (user.is_admin
+                 or user.is_moderator
+                 or user.is_superuser)
         )
 
     def has_permission(self, request, view):
@@ -31,7 +31,6 @@ class AuthorModeratorAdminOrReadOnly(permissions.BasePermission):
             request.method in permissions.SAFE_METHODS
             or request.user.is_authenticated
         )
-
 
     def has_object_permission(self, request, view, obj):
         return (
