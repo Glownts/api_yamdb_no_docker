@@ -1,3 +1,7 @@
+"""
+Настройки админ-зоны приложения views.
+"""
+
 from django.contrib import admin
 
 from .models import (
@@ -13,6 +17,7 @@ from .models import (
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
+    """Регистрация админ-зоны для модели Category."""
     list_display = ('id', 'name', 'slug',)
     search_fields = ('name',)
     list_filter = ('name',)
@@ -20,6 +25,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
+    """Регистрация админ-зоны для модели Comment."""
     list_display = (
         'id',
         'text',
@@ -33,6 +39,7 @@ class CommentAdmin(admin.ModelAdmin):
 
 @admin.register(Genre)
 class GenreAdmin(admin.ModelAdmin):
+    """Регистрация админ-зоны для модели Genre."""
     list_display = ('id', 'name', 'slug',)
     search_fields = ('name',)
     list_filter = ('name',)
@@ -40,12 +47,14 @@ class GenreAdmin(admin.ModelAdmin):
 
 @admin.register(GenreTitle)
 class GenreTitle(admin.ModelAdmin):
+    """Регистрация админ-зоны для модели GenreTitle."""
     list_display = ('id', 'genre', 'title',)
     search_fields = ('title',)
 
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
+    """Регистрация админ-зоны для модели Review."""
     list_display = (
         'id',
         'text',
@@ -60,6 +69,7 @@ class ReviewAdmin(admin.ModelAdmin):
 
 @admin.register(Title)
 class TitleAdmin(admin.ModelAdmin):
+    """Регистрация админ-зоны для модели Title."""
     list_display = ('id', 'name', 'year', 'category', 'description',)
     search_fields = ('name', 'description',)
     list_filter = ('name', 'description',)
@@ -67,6 +77,7 @@ class TitleAdmin(admin.ModelAdmin):
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
+    """Регистрация админ-зоны для модели User."""
     list_display = ('id', 'email', 'first_name', 'last_name', 'bio', 'role')
     search_fields = ('first_name', 'last_name')
     list_filter = ('role',)

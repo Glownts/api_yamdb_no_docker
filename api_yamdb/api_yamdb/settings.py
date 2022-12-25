@@ -125,6 +125,9 @@ LENG_MAX = 256
 LENG_DATA_USER = 150
 LENG_EMAIL = 254
 LENG_CUT = 30
+ROLE_LENG = 15
+
+MAIL = 'YaMDb@fake.com'
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'

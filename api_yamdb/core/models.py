@@ -1,10 +1,14 @@
+"""
+Базовые модели.
+"""
+
 from django.db import models
 from django.conf import settings
 from django.core.validators import validate_slug
 
 
 class GenreAndCategoryModel(models.Model):
-    """Base model for Genre and Category models."""
+    """Базовая модель для Genre and Category."""
 
     name = models.CharField(
         unique=True,
@@ -25,7 +29,7 @@ class GenreAndCategoryModel(models.Model):
 
 
 class ReviewAndCommentModel(models.Model):
-    """Base model for Review and Comment."""
+    """Базовая модель для Review and Comment."""
 
     text = models.CharField(
         max_length=settings.LENG_MAX

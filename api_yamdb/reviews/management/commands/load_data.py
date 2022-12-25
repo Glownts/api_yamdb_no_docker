@@ -1,3 +1,7 @@
+"""
+Кастомные менеджмент-команды.
+"""
+
 from csv import DictReader
 from django.core.management import BaseCommand
 
@@ -21,7 +25,7 @@ database with tables"""
 DIR = './static/data/'
 
 
-class Command(BaseCommand):
+class Load_Data(BaseCommand):
     '''
     Загружает данные из csv в БД.
     Если данные уже есть в БД, выдаст ошибку ALREDY_LOADED_ERROR_MESSAGE.

@@ -1,5 +1,5 @@
 '''
-Конфиг приложения core.
+Конфиг приложения reviews.
 '''
 
 from django.apps import AppConfig

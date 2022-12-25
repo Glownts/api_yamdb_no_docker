@@ -1,3 +1,7 @@
+"""
+Валидации.
+"""
+
 from datetime import datetime
 
 from django.conf import settings
@@ -6,7 +10,7 @@ from django.core.exceptions import ValidationError
 
 
 class UsernameRegexValidator(UnicodeUsernameValidator):
-    """User Name Validation."""
+    """Валидация поля username."""
 
     regex = r'@/./+/-/_'
     flags = 0
@@ -23,7 +27,7 @@ class UsernameRegexValidator(UnicodeUsernameValidator):
 
 
 def username_user(value):
-    """User Name verification."""
+    """Подтвержедение поля username."""
     if value == 'me':
         raise ValidationError(
             'User name not found.'
@@ -32,7 +36,7 @@ def username_user(value):
 
 
 def validate_year(value):
-    """Checking the year."""
+    """Проверка года."""
     if value >= datetime.now().year:
         raise ValidationError(
             message=f'Year {value} more than current!',

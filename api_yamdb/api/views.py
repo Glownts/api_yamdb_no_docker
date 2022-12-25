@@ -3,7 +3,6 @@
 '''
 
 from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -20,7 +19,6 @@ from reviews.models import Category, Genre, Review, Title, User
 
 from .filters import TitleFilter
 from .mixins import ListCreateDestroyViewSet, NotPUTViewSet
-
 from .permissions import (
     AdminOnly,
     AdminOrReadOnly,
@@ -38,6 +36,7 @@ from .serializers import (
     TitleSerializer,
     UserSerializer
 )
+from .utils import mail_confirmation
 
 
 class CategoryViewSet(ListCreateDestroyViewSet):
@@ -60,9 +59,6 @@ class CategoryViewSet(ListCreateDestroyViewSet):
     filter_backends = (DjangoFilterBackend, SearchFilter,)
     search_fields = ('name',)
 
-    def perform_create(self, serializer):
-        return serializer.save()
-
 
 class GenreViewSet(ListCreateDestroyViewSet):
     '''
@@ -83,9 +79,6 @@ class GenreViewSet(ListCreateDestroyViewSet):
     permission_classes = (AdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend, SearchFilter,)
     search_fields = ('name',)
-
-    def perform_create(self, serializer):
-        return serializer.save()
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -133,7 +126,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
     permission_classes = (AuthorModeratorAdminOrReadOnly,)
 
     def get_queryset(self):
-        return Review.objects.filter(title=self.kwargs.get('title_id'))
+        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
+        return title.reviews.all()
 
     def perform_create(self, serializer):
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
@@ -159,7 +153,8 @@ class CommentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         title_id = self.kwargs.get('title_id')
         review_id = self.kwargs.get('review_id')
-        return Review.objects.get(id=review_id, title=title_id).comments.all()
+        review = get_object_or_404(Review, id=review_id, title=title_id)
+        return review.comments.all()
 
     def perform_create(self, serializer):
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
@@ -194,7 +189,7 @@ class UserViewSet(NotPUTViewSet):
     search_fields = ['username', ]
 
     @action(
-        detail=False, methods=['get', 'patch'], url_path='me', url_name='me',
+        detail=False, methods=['get', 'patch'], url_path='me',
         permission_classes=(permissions.IsAuthenticated,)
     )
     def me(self, request):
@@ -216,21 +211,10 @@ class UserViewSet(NotPUTViewSet):
             )
 
 
-def mail_confirmation(request, user):
-    confirmation_code = default_token_generator.make_token(user)
-
-    send_mail(
-        'Тема письма',
-        confirmation_code,
-        request.user,
-        [user.email],
-        fail_silently=False,
-    )
-
-
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def signup(request):
+    """Функция регистрации пользователя."""
     if request.method == 'POST':
         serializer = SignupSerializer(data=request.data)
         if serializer.is_valid():
@@ -250,6 +234,7 @@ def signup(request):
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def get_jwt_token(request):
+    """Функция получения jwt-токена."""
     if request.method == 'POST':
 
         serializer = GetTokenSerializer(data=request.data)

@@ -2,10 +2,8 @@
 URLs приложения api.
 
 router.urls включает адреса для доступа api к
-моделям проекта. djoser.urls и djoser.urls.jwt
-включают адреса для регистрации и аутентификации
-пользователя; получения, обновления и проверки
-валидности токена.
+моделям проекта. auth/token/ и auth/signup/ - это
+адреса для регистрации и аутентификации пользователя.
 '''
 
 from django.urls import include, path
@@ -27,9 +25,10 @@ router = DefaultRouter()
 router.register(r'categories', CategoryViewSet, basename='categories')
 router.register(r'genres', GenreViewSet, basename='genres')
 router.register(r'titles', TitleViewSet, basename='titles')
-router.register(r'titles/(?P<title_id>.+)/reviews',
+router.register(r'titles/(?P<title_id>\d+)/reviews',
                 ReviewViewSet, basename='reviews')
-router.register(r'titles/(?P<title_id>.+)/reviews/(?P<review_id>.+)/comments',
+router.register(r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/'
+                + 'comments',
                 CommentViewSet, basename='comments')
 router.register(r'users', UserViewSet, basename='users')
 

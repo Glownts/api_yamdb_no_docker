@@ -1,3 +1,7 @@
+"""
+Модели приложения reviews.
+"""
+
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -9,6 +13,22 @@ from .validators import UsernameRegexValidator, username_user, validate_year
 
 
 class User(AbstractUser):
+    """
+    Модель пользователя.
+
+    Имеет поля ROLE_CHOICES, username, email, role, bio.
+
+    ROLE_CHOICES определяет доступные варинаты для поля role,
+    поле role отвечает за разрешения конкертного пользователя.
+
+    username - имя пользователя, проходит валидацию и не может иметь
+    значения, указанные в валидации.
+
+    На указаный email высылается код подтверждения.
+
+    Поле bio не является обязательным и заполняется пользователем отдельно.
+    Это поле личной информации.
+    """
 
     USER = 'user'
     ADMIN = 'admin'
@@ -25,8 +45,6 @@ class User(AbstractUser):
         validators=(UsernameRegexValidator(), username_user),
         max_length=settings.LENG_DATA_USER,
         unique=True,
-        blank=False,
-        null=False,
         help_text=('The set of characters is no more '
                    f'than {settings.LENG_DATA_USER}.'
                    'Only letters, numbers and @/./+/-/_'),
@@ -38,12 +56,10 @@ class User(AbstractUser):
         'email',
         max_length=settings.LENG_EMAIL,
         unique=True,
-        blank=False,
-        null=False
     )
     role = models.CharField(
         'role',
-        max_length=max(len(role) for role, _ in ROLE_CHOICES),
+        max_length=settings.ROLE_LENG,
         choices=ROLE_CHOICES,
         default=USER,
         blank=True
@@ -77,15 +93,36 @@ class User(AbstractUser):
 
 
 class Category(GenreAndCategoryModel):
-    """Category."""
+    """
+    Модель категорий произведений.
+
+    Основывается на базовой модели GenreAndCategoryModel.
+    Определяет поля name и slug.
+    """
 
 
 class Genre(GenreAndCategoryModel):
-    """Genre."""
+    """
+    Модель жанров произведений.
+
+    Основывается на базовой модели GenreAndCategoryModel.
+    Определяет поля name и slug.
+    """
 
 
 class Title(models.Model):
-    """Title."""
+    """
+    Модель произведений.
+
+    Определяет поля name, year, category, description и
+    genre.
+
+    name - название произведения;
+    year - дата выхода;
+    category - id категории, к которой относится данное произведение;
+    genre - id жанра, к которому относится данное произведение;
+    description - необязательное поле - подробное описание произведения.
+    """
 
     name = models.CharField(
         'title',
@@ -131,6 +168,15 @@ class GenreTitle(models.Model):
 
 
 class Review(ReviewAndCommentModel):
+    """
+    Модель отзыва на произведение.
+
+    Определяет поля title, score и author.
+
+    title - id произведения, на который написан отзыв;
+    score - оценка произведения от 1 до 10, стандартное значение 5;
+    author  - id автора комментария.
+    """
 
     title = models.ForeignKey(
         Title,
@@ -164,7 +210,14 @@ class Review(ReviewAndCommentModel):
 
 
 class Comment(ReviewAndCommentModel):
-    """Comment."""
+    """
+    Модель комментария к отзыву на произведение.
+
+    Определяет поля review и author.
+
+    review - id отзыва, к котормоу написан комментарий;
+    author  - id автора комментария.
+    """
 
     review = models.ForeignKey(
         Review,

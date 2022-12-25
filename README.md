@@ -63,6 +63,11 @@ python manage.py migrate
 python manage.py runserver
 
 
+## Загрузка данных в БД из csv
+Команда python manage.py load_data загружает данные из csv в БД.
+Если данные уже есть в БД, выдаст ошибку ALREDY_LOADED_ERROR_MESSAGE.
+
+
 ## Документация
 Документация будет доступна после запуска проекта по адресу `/redoc/`.
 
