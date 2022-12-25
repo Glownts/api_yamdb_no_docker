@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.db.models import Avg
+from django.shortcuts import get_object_or_404
 
 
 from rest_framework import serializers
@@ -44,8 +44,9 @@ class CommentSerializer(serializers.ModelSerializer):
 class TitleSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True)
     category = CategorySerializer()
-    rating = serializers.SerializerMethodField()
-
+    rating = serializers.FloatField(read_only=True)
+    
+    
     class Meta:
         model = Title
         fields = (
@@ -57,12 +58,6 @@ class TitleSerializer(serializers.ModelSerializer):
             'genre',
             'rating'
         )
-
-    def get_rating(self, obj):
-        rating = obj.reviews.aggregate(Avg('score')).get('score__avg')
-        if rating is not None:
-            rating = round(rating)
-        return rating
 
 
 class TitleCreateSerializer(serializers.ModelSerializer):
@@ -99,9 +94,15 @@ class ReviewSerializer(serializers.ModelSerializer):
             author=self.context['request'].user,
             title=title_id
         ).count()
+        title = get_object_or_404(
+            Title,
+            id=title_id
+        )
 
         if self.context['request'].method == 'POST' and review_exists:
-            raise serializers.ValidationError
+            raise serializers.ValidationError(
+                f'Отзыв на произведение {title.name} уже существует'
+            )
 
         return data
 
@@ -141,9 +142,6 @@ class UserSerializer(serializers.ModelSerializer):
     def validate(self, data):
         email = data.get('email')
         username = data.get('username')
-
-        if self.context['request'].method == 'PATCH':
-            path_username = self.context['view'].kwargs.get('username')
 
         if email and User.objects.filter(email=data['email']).exists():
             existing = User.objects.get(email=data['email'])
