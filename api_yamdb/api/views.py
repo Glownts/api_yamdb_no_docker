@@ -30,9 +30,8 @@ from .serializers import (
     CommentSerializer,
     GenreSerializer,
     GetTokenSerializer,
-    SelfSerializer,
     ReviewSerializer,
-    SignupSerializer,
+    UserCreationSerializer,
     TitleCreateSerializer,
     TitleSerializer,
     UserSerializer
@@ -196,11 +195,11 @@ class UserViewSet(NotPUTViewSet):
     )
     def me(self, request):
         if request.method == 'GET':
-            serializer = SelfSerializer(request.user)
+            serializer = UserSerializer(request.user)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         if request.method == 'PATCH':
-            serializer = SelfSerializer(
+            serializer = UserSerializer(
                 request.user,
                 data=request.data,
                 partial=True
@@ -218,7 +217,7 @@ class UserViewSet(NotPUTViewSet):
 def signup(request):
     """Функция регистрации пользователя."""
     if request.method == 'POST':
-        serializer = SignupSerializer(data=request.data)
+        serializer = UserCreationSerializer(data=request.data)
         if serializer.is_valid():
             if not User.objects.filter(
                 username=serializer.validated_data['username'],

@@ -158,62 +158,7 @@ class UserSerializer(serializers.ModelSerializer):
         return data
 
 
-class SelfSerializer(serializers.ModelSerializer):
-    username = serializers.RegexField(
-        regex=r'^[\w.@+-]+\Z',
-        required=True,
-        max_length=settings.LENG_DATA_USER,
-    )
-    email = serializers.EmailField(
-        required=True,
-        max_length=settings.LENG_EMAIL,
-    )
-
-    bio = serializers.CharField(required=False)
-    first_name = serializers.CharField(
-        required=False,
-        max_length=settings.LENG_DATA_USER
-    )
-    last_name = serializers.CharField(
-        required=False,
-        max_length=settings.LENG_DATA_USER
-    )
-
-    class Meta:
-        model = User
-        fields = (
-            'username', 'email', 'first_name', 'last_name', 'bio', 'role',
-        )
-        validators = [
-            UniqueTogetherValidator(
-                User.objects.all(), fields=['username', 'email']
-            )
-        ]
-
-    def validate(self, data):
-        сurrent_user_email = self.instance.email
-        сurrent_user_username = self.instance.username
-
-        email = data.get('email')
-        username = data.get('username')
-
-        if email and User.objects.filter(email=email).exists():
-            existing = User.objects.get(email=data['email'])
-            if existing.username != сurrent_user_username:
-                raise serializers.ValidationError(
-                    detail='This email already used'
-                )
-
-        if username and User.objects.filter(username=username).exists():
-            existing = User.objects.get(username=username)
-            if existing.email != сurrent_user_email:
-                raise serializers.ValidationError(
-                    detail='This name already used'
-                )
-        return data
-
-
-class SignupSerializer(serializers.ModelSerializer):
+class UserCreationSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(
         required=True,
         max_length=settings.LENG_EMAIL,
