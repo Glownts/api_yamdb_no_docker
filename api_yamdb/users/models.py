@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
-from .validators import UsernameValidator
+from django.contrib.auth.validators import UnicodeUsernameValidator
 
 
 class User(AbstractUser):
@@ -36,7 +36,7 @@ class User(AbstractUser):
 
     username = models.CharField(
         'username',
-        validators=(UsernameValidator(),),
+        validators=(UnicodeUsernameValidator(),),
         max_length=settings.LENG_DATA_USER,
         unique=True,
         help_text=('The set of characters is no more '

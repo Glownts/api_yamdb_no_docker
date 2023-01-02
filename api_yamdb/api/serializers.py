@@ -1,9 +1,10 @@
 from django.conf import settings
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.shortcuts import get_object_or_404
 
 
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
+from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 
@@ -108,24 +109,19 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    username = serializers.RegexField(
-        regex=r'^[\w.@+-]+\Z',
-        required=True,
+    username = serializers.CharField(
+        validators=[
+            UniqueValidator(queryset=User.objects.all()),
+            UnicodeUsernameValidator()
+        ],
         max_length=settings.LENG_DATA_USER,
+        required=True,
     )
     email = serializers.EmailField(
-        required=True,
+        validators=[
+            UniqueValidator(queryset=User.objects.all())
+        ],
         max_length=settings.LENG_EMAIL,
-    )
-
-    bio = serializers.CharField(required=False)
-    first_name = serializers.CharField(
-        required=False,
-        max_length=settings.LENG_DATA_USER
-    )
-    last_name = serializers.CharField(
-        required=False,
-        max_length=settings.LENG_DATA_USER
     )
 
     class Meta:
@@ -139,35 +135,18 @@ class UserSerializer(serializers.ModelSerializer):
             )
         ]
 
-    def validate(self, data):
-        email = data.get('email')
-        username = data.get('username')
-
-        if email and User.objects.filter(email=data['email']).exists():
-            existing = User.objects.get(email=data['email'])
-            if username and existing.username != username:
-                raise serializers.ValidationError(
-                    detail='This email already used'
-                )
-
-        if username and User.objects.filter(username=username).exists():
-            existing = User.objects.get(username=data['username'])
-            if email and existing.email != email:
-                raise serializers.ValidationError(
-                    detail='This name already used'
-                )
-        return data
-
 
 class UserCreationSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(
+        validators=[
+            UnicodeUsernameValidator()
+        ],
+        max_length=settings.LENG_DATA_USER,
+        required=True,
+    )
     email = serializers.EmailField(
         required=True,
         max_length=settings.LENG_EMAIL,
-    )
-    username = serializers.RegexField(
-        regex=r'^[\w.@+-]+\Z',
-        required=True,
-        max_length=settings.LENG_DATA_USER,
     )
 
     class Meta:
@@ -175,7 +154,7 @@ class UserCreationSerializer(serializers.ModelSerializer):
         fields = ('username', 'email',)
 
     def validate_username(self, data):
-        if data == 'me':
+        if data in settings.BANNED_NAMES:
             raise serializers.ValidationError(
                 'Нельзя использовать "me" в качестве username.'
             )

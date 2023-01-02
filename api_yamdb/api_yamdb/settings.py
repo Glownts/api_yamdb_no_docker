@@ -156,3 +156,5 @@ SIMPLE_JWT = {
 }
 
 AUTH_USER_MODEL = 'users.User'
+
+BANNED_NAMES = ['me']
