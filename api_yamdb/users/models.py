@@ -24,15 +24,10 @@ class User(AbstractUser):
     Это поле личной информации.
     """
 
-    USER = 'user'
-    ADMIN = 'admin'
-    MODERATOR = 'moderator'
-
-    ROLE_CHOICES = (
-        (USER, 'user'),
-        (ADMIN, 'admin'),
-        (MODERATOR, 'moderator'),
-    )
+    class Roles(models.TextChoices):
+        USER = 'user', 'USER'
+        ADMIN = 'admin', 'ADMIN'
+        MODERATOR = 'moderator', 'MODERATOR'
 
     username = models.CharField(
         'username',
@@ -54,8 +49,8 @@ class User(AbstractUser):
     role = models.CharField(
         'role',
         max_length=settings.ROLE_LENG,
-        choices=ROLE_CHOICES,
-        default=USER,
+        choices=Roles.choices,
+        default=Roles.USER,
         blank=True
     )
     bio = models.TextField(
@@ -76,11 +71,14 @@ class User(AbstractUser):
 
     @property
     def is_moderator(self):
-        return self.role == self.MODERATOR
+        return self.role == self.Roles.MODERATOR
 
     @property
     def is_admin(self):
-        return self.role == self.ADMIN or self.is_superuser or self.is_staff
+        return (
+            self.role == self.Roles.ADMIN
+            or self.is_superuser
+            or self.is_staff)
 
     def __str__(self):
         return f'{self.username} {self.email} {self.role}'
