@@ -158,20 +158,22 @@ class UserCreationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Нельзя использовать "me" в качестве username.'
             )
-        return data
-
-    def validate(self, data):
-        if User.objects.filter(email=data['email']).exists():
-            existing = User.objects.get(email=data['email'])
-            if existing.username != data['username']:
-                raise serializers.ValidationError(
-                    detail='This email already used'
-                )
-        if User.objects.filter(username=data['username']).exists():
-            existing = User.objects.get(username=data['username'])
-            if existing.email != data['email']:
+        if User.objects.filter(username=data).exists():
+            email = self.initial_data.get('email')
+            existing = User.objects.get(username=data)
+            if existing.email != email:
                 raise serializers.ValidationError(
                     detail='This name already used'
+                )
+        return data
+
+    def validate_email(self, data):
+        if User.objects.filter(email=data).exists():
+            username = self.initial_data.get('username')
+            existing = User.objects.get(email=data)
+            if existing.username != username:
+                raise serializers.ValidationError(
+                    detail='This email already used'
                 )
         return data
 
