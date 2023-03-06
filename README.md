@@ -1,4 +1,3 @@
-### ЯП - Спринт 10 - Проект YaMDb (групповой проект). Python-разработчик (бекенд) (Яндекс.Практикум)
 ### Описание
 Проект YaMDb собирает отзывы (Review) пользователей на произведения (Title).
 Сами произведения в YaMDb не хранятся, здесь нельзя посмотреть фильм или послушать музыку
@@ -71,8 +70,4 @@ python manage.py runserver
 ## Документация
 Документация будет доступна после запуска проекта по адресу `/redoc/`.
 
-## Авторы
-- :white_check_mark: [Glownts (Тимлид - разработчик 1)](https://github.com/Glownts)
-- :white_check_mark: [Alexandr (разработчик 2)](link)
-- :white_check_mark: [andrewlegkii (разработчик 3)](https://github.com/andrewlegkii)
 
